@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/post/updateLike', [LikeController::class, 'updateLike']);
+    Route::post('/post/comment/updateLike', [LikeController::class, 'updateCommentLike']);
 });
 
 Route::prefix('admin')->middleware('auth:sanctum')->group(function() {
@@ -45,3 +46,4 @@ Route::get('/comment/getRepliesLength', [CommentController::class, 'getRepliesLe
 Route::get('/comment/articleAllComments', [CommentController::class, 'articleAllComments']);
 // post
 Route::get('/posts/getPost', [FrontPostController::class, 'getPost']);
+Route::get('/post/relatedPosts', [FrontPostController::class, 'relatedPosts']);

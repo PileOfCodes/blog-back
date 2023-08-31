@@ -6,6 +6,8 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\PostResource;
+use App\Models\Category;
+use App\Models\CategoryPost;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -37,5 +39,14 @@ class PostController extends ApiController
     public function getPost(Request $request) {
         $post = Post::where('slug', $request->slug)->first();
         return $this->successResponse('get post', 200, new PostResource($post));
+    }
+
+    public function relatedPosts(Request $request) {
+        $post = Post::where('slug', $request->slug)->first();
+        $categoryIds = CategoryPost::where('post_id', $post->id)->pluck('category_id');
+        $postIds = CategoryPost::whereIn('category_id', $categoryIds)->pluck('post_id');
+        $posts = Post::where('slug', '!=', $request->slug)
+        ->whereIn('id', $postIds)->orderBy('created_at','desc')->take(4)->get();
+        return $this->successResponse('related posts', 200, PostResource::collection($posts));
     }
 }
