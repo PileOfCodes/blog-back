@@ -43,12 +43,27 @@ class CommentController extends ApiController
 
     public function update(Request $request, Comment $comment)
     {
-        //
+        $validate = Validator::make($request->all(), [
+            'body' => 'required'
+        ]);
+        if($validate->fails()) {
+            return $this->errorResponse($validate->messages(), 422);
+        }
+        DB::beginTransaction();
+        $comment->update([
+            'user_id' => auth()->user()->id,
+            'body' => $request->body
+        ]);
+        DB::commit();
+        return $this->successResponse('comment updated successfully', 200, new CommentResource($comment));
     }
 
     public function destroy(Comment $comment)
     {
-        //
+        DB::beginTransaction();
+        $comment->delete();
+        DB::commit();
+        return $this->successResponse('comment is deleted', 200, new CommentResource($comment));
     }
 
     public function getComments(Request $request) {
