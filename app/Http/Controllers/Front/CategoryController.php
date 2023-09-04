@@ -14,4 +14,9 @@ class CategoryController extends ApiController
         $categories = Category::take(11)->get();
         return $this->successResponse('all categories', 200, CategoryResource::collection($categories));
     }
+
+    public function index() {
+        $categories = Category::all();
+        return $this->successResponse('get all categories', 200, CategoryResource::collection($categories));
+    }
 }

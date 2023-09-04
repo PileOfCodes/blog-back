@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,7 +15,7 @@ class AuthController extends ApiController
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'c_password' => 'required|same:password'
@@ -75,5 +77,30 @@ class AuthController extends ApiController
         auth()->user()->tokens()->delete();
 
         return $this->successResponse('user logged out', 200, "");
+    }
+
+    public function changeProfile(Request $request) {
+        $validate = Validator::make($request->all(), [
+            'image' => 'required',
+            'name' => 'nullable|string',
+            'password' => 'nullable|string|min:8',
+            'email' => 'nullable|email|unique:users'
+        ]);
+        if($validate->fails()) {
+            return $this->errorResponse($validate->messages(), 422);
+        }
+
+        $imageName = Carbon::now()->microsecond . '.' . $request->image->extension();
+        $request->image->storeAs('images/profile', $imageName, 'public');
+
+        DB::beginTransaction();
+        $user = User::where('id', auth()->user()->id)->update([
+            'name' => $request->name == null || $request->name == '' ? auth()->user()->name : $request->name, 
+            'email' => $request->email == null || $request->email == '' ? auth()->user()->email : $request->email, 
+            'password' => $request->password == null || $request->password == '' ? auth()->user()->password : bcrypt($request->password), 
+            'image' => $request->image == null || $request->image == '' ? auth()->user()->image : $imageName 
+        ]);
+        DB::commit();
+        return $this->successResponse('user profile', 200, new UserResource($user));
     }
 }

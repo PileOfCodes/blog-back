@@ -3,10 +3,15 @@
 namespace App\Exceptions;
 
 use App\Traits\apiResponse;
+use BadMethodCallException;
 use Error;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Throwable;
@@ -37,26 +42,47 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
-        if($e instanceof ModelNotFoundException)
-        {
-            return $this->errorResponse($e->getMessage(),404);
+        if ($e instanceof ModelNotFoundException) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 404);
         }
-        if($e instanceof NotFoundHttpException)
-        {
-            return $this->errorResponse($e->getMessage(),404);
+
+        if ($e instanceof NotFoundHttpException) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 404);
         }
-        if($e instanceof MethodNotAllowedException)
-        {
-            return $this->errorResponse($e->getMessage(),404);
+
+        if ($e instanceof MethodNotAllowedHttpException) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
-        if($e instanceof Error)
-        {
-            return $this->errorResponse($e->getMessage(),500);
+
+        if ($e instanceof Exception) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
-        if($e instanceof Exception)
-        {
-            return $this->errorResponse($e->getMessage(),404);
+
+        if ($e instanceof BadMethodCallException) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
         }
-        return $this->errorResponse($e->getMessage(),500);
+
+        if ($e instanceof Error) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+
+        if ($e instanceof QueryException) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+
+        if ($e instanceof RelationNotFoundException) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+
+        DB::rollBack();
+        return $this->errorResponse($e->getMessage(), 500);
     }
 }
