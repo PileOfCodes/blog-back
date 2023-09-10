@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Cviebrock\EloquentSluggable\Sluggable;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class Post extends Model
+class Archive extends Model
 {
     use HasFactory;
     use Sluggable;
@@ -22,17 +21,8 @@ class Post extends Model
     {
         return [
             'slug' => [
-                'source' => 'englishTitle'
+                'source' => 'date'
             ]
         ];
     }
-
-    public function categories() {
-        return $this->belongsToMany(Category::class, 'category_posts');
-    }
-
-    public function likes() : MorphMany {
-        return $this->morphMany(Like::class, 'likeable');
-    }
-
 }

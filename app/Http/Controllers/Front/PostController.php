@@ -6,6 +6,8 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\PostResource;
+use App\Models\Archive;
+use App\Models\ArchivePost;
 use App\Models\Category;
 use App\Models\CategoryPost;
 use App\Models\Comment;
@@ -48,5 +50,18 @@ class PostController extends ApiController
         $posts = Post::where('slug', '!=', $request->slug)
         ->whereIn('id', $postIds)->orderBy('created_at','desc')->take(4)->get();
         return $this->successResponse('related posts', 200, PostResource::collection($posts));
+    }
+
+    public function getVisit(Request $request) {
+        $post = Post::where('slug', $request->slug)->first();
+        $post->update(['visit' => $post->visit += 1]);
+        return 'ok';
+    }
+
+    public function getArchivePosts(Request $request) {
+        $archive = Archive::where('slug', $request->slug)->first();
+        $postIds = ArchivePost::where('archive_id', $archive->id)->pluck('post_id');
+        $posts = Post::whereIn('id', $postIds)->get();
+        return $this->successResponse('all archive posts', 200, PostResource::collection($posts));
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use App\Models\Category;
 use App\Models\CategoryPost;
+use App\Models\Comment;
+use App\Models\Like;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -20,7 +22,10 @@ class PostResource extends JsonResource
     {
         $user = User::where('id', $this->user_id)->first();
         $categoryIds = CategoryPost::where('post_id', $this->id)->pluck('category_id');
-        $categories = Category::whereIn('id', $categoryIds)->get(); 
+        $categories = Category::whereIn('id', $categoryIds)->get();
+        $likes = Like::where('likeable_type', 'post')->where('is_liked', 1)
+        ->where('likeable_id', $this->id)->get();
+        $comments = Comment::where('post_id', $this->id)->where('status', 1)->get(); 
         return [
             'id' => $this->id,
             'englishTitle' => $this->englishTitle,
@@ -34,7 +39,9 @@ class PostResource extends JsonResource
             'userImage' => url(env('USER_IMAGE') . $user->image),
             'userName' => $user->name,
             'slug' => $this->slug,
-            'owner' => $user->name
+            'owner' => $user->name,
+            'likes_count' => count($likes),
+            'comments_count' => count($comments)
         ];
     }
 }
