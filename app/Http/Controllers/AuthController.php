@@ -43,7 +43,7 @@ class AuthController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
-            'password' => 'required|string'
+            'password' => 'required|string|min:8'
         ]);
 
         if ($validator->fails()) {
@@ -53,11 +53,11 @@ class AuthController extends ApiController
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return $this->errorResponse('کاربر مورد نظر پیدا نشد', 422);
+            return $this->errorResponse(['کاربر مورد نظر پیدا نشد'], 422);
         }
 
         if (!Hash::check($request->password, $user->password)) {
-            return $this->errorResponse('پسورد اشتباه است', 422);
+            return $this->errorResponse(['پسورد اشتباه است'], 422);
         }
 
         $token = $user->createToken('myApp')->plainTextToken;
