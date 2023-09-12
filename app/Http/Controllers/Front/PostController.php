@@ -22,14 +22,14 @@ class PostController extends ApiController
         if($request->search != '' || $request->search != null) {
             $posts = Post::where('englishTitle', 'LIKE', "%{$request->search}%")
             ->orWhere('persianTitle', 'LIKE', "%{$request->search}%")
-            ->orderBy('created_at', 'desc')->paginate(2);
+            ->orderBy('created_at', 'desc')->paginate(4);
             return $this->successResponse('all posts', 200, [
                 'posts' => PostResource::collection($posts),
                 'links' => PostResource::collection($posts)->response()->getData()->links,
                 'meta' => PostResource::collection($posts)->response()->getData()->meta
             ]);
         }else {
-            $posts = Post::orderBy('created_at', 'desc')->paginate(2);
+            $posts = Post::orderBy('created_at', 'desc')->paginate(4);
             return $this->successResponse('all posts', 200, [
                 'posts' => PostResource::collection($posts),
                 'links' => PostResource::collection($posts)->response()->getData()->links,
