@@ -14,7 +14,7 @@ class PostController extends ApiController
 {
     public function index()
     {
-        $posts = Post::paginate(8);
+        $posts = Post::paginate(10);
         return $this->successResponse('all posts', 200, [
             'posts' => PostResource::collection($posts),
             'links' => PostResource::collection($posts)->response()->getData()->links,

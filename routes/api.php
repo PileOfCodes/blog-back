@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\DraftController;
 use App\Http\Controllers\Front\CategoryController as FrontCategoryController;
 use App\Http\Controllers\Front\PostController as FrontPostController;
 use App\Http\Controllers\LandingController;
@@ -33,10 +34,16 @@ Route::middleware('auth:sanctum')->group(function() {
 });
 
 Route::prefix('admin')->middleware('auth:sanctum')->group(function() {
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::apiResource('drafts', DraftController::class);
     Route::apiResource('posts', PostController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('users', UserController::class);
     Route::apiResource('comments', CommentController::class);
+});
+Route::prefix('admin')->group(function() {
+    Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
